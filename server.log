@@ -1,0 +1,39 @@
+nohup: ignoring input
+✅ TextBelt FREE SMS service enabled (no account needed)
+✅ Email service initialized (Custom SMTP: smtp.gmail.com)
+Server running on port 5000
+Connected to MongoDB
+
+❌ TextBelt Error: Sorry, free SMS are disabled for this country due to abuse.
+Quota: undefined
+
+
+❌ ===== SMS SENDING FAILED =====
+To: +919588183448
+Error: Sorry, free SMS are disabled for this country due to abuse.
+==============================
+
+
+✅ ===== EMAIL SENT SUCCESSFULLY =====
+To: dollybisht24@navgurukul.org
+Subject: Order Confirmation - #13992E9B
+Message ID: <ccfbf2cf-54b7-75ee-bf66-cef864e85ebd@navgurukul.org>
+======================================
+
+
+❌ TextBelt Error: Sorry, free SMS are disabled for this country due to abuse.
+Quota: undefined
+
+
+❌ ===== SMS SENDING FAILED =====
+To: +919588183448
+Error: Sorry, free SMS are disabled for this country due to abuse.
+==============================
+
+
+✅ ===== EMAIL SENT SUCCESSFULLY =====
+To: tiwanamanpreet536@gmail.com
+Subject: Order Confirmation - #13992EB4
+Message ID: <67cefc37-dd7e-252a-f12c-b10ca585ea94@navgurukul.org>
+======================================
+
