@@ -17,30 +17,25 @@ const { generalLimiter, authLimiter, orderLimiter, paymentLimiter } = require('.
 const { sanitizeQuery } = require('./middleware/validator');
 
 // ===========================================
-// STRICT PRODUCTION-ONLY CORS
+// CORS CONFIGURATION (VERCEL SAFE)
 // ===========================================
-if (!process.env.CORS_ORIGINS) {
-  throw new Error('❌ CORS_ORIGINS environment variable is REQUIRED');
-}
-
 const allowedOrigins = process.env.CORS_ORIGINS
-  .split(',')
-  .map(origin => origin.trim());
+  ? process.env.CORS_ORIGINS.split(',').map(o => o.trim())
+  : ['https://foodbackend-neon.vercel.app/', 'https://food-front-sepia.vercel.app/'];
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow non-browser requests (Postman, cron, server-to-server)
-    if (!origin) return callback(null, true);
+    if (!origin) return callback(null, true); // Postman, server-to-server
 
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
-    return callback(new Error(`❌ CORS blocked for origin: ${origin}`));
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false // IMPORTANT: no cookies unless explicitly needed
+  credentials: false // set true ONLY if using cookies
 };
 
 app.use(cors(corsOptions));
@@ -50,7 +45,7 @@ app.options('*', cors(corsOptions));
 // GLOBAL MIDDLEWARE
 // ===========================================
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
 app.use(sanitizeQuery);
 
 app.set('trust proxy', 1);
@@ -59,22 +54,14 @@ app.use(generalLimiter);
 // ===========================================
 // MONGODB CONNECTION
 // ===========================================
-mongoose
-  .connect(process.env.MONGO_URI || process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    maxPoolSize: 10,
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-  })
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err);
-    process.exit(1);
-  });
-
-mongoose.connection.on('error', err => {
-  console.error('MongoDB error:', err);
+mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('✅ MongoDB connected'))
+.catch(err => {
+  console.error('❌ MongoDB error:', err);
+  process.exit(1);
 });
 
 // ===========================================
@@ -98,7 +85,7 @@ const emailTransporter = nodemailer.createTransport({
 });
 
 // ===========================================
-// REGISTER MODELS
+// MODELS (keep imports so mongoose registers them)
 // ===========================================
 require('./models/MenuItem');
 require('./models/Restaurant');
@@ -118,13 +105,13 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/payment', paymentLimiter, require('./routes/payment'));
 
 // ===========================================
-// HEALTH CHECKS
+// HEALTH CHECK
 // ===========================================
 app.get('/', (req, res) => {
   res.json({
     message: 'Food Ordering API running 🚀',
     status: 'healthy',
-    environment: 'production'
+    environment: process.env.NODE_ENV || 'production'
   });
 });
 
@@ -143,6 +130,6 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // ===========================================
-// ✅ VERCEL SERVERLESS EXPORT (CRITICAL)
+// ✅ VERCEL EXPORT (CRITICAL)
 // ===========================================
 module.exports = app;
